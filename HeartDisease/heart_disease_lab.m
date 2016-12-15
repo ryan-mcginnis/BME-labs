@@ -15,8 +15,8 @@ dt.Properties.VariableNames = {'age','sex','cp','trestbps','chol','fbs',...
                                'restecg','thalach','exang','oldpeak',...
                                'slope','ca','thal','num'};
                            
-% Describe each variable based on the readme file                           
-% Label the data types as nominal, dichotomous, ordinal, or continuous.
+% 1. Describe each variable based on the readme file                           
+% 2. Label the data types as nominal, dichotomous, ordinal, or continuous.
 
 %% Convert appropriate variables to double based on descriptions
 dt.ca = str2double(dt.ca);
@@ -36,10 +36,10 @@ dt.num = categorical(dt.num,'Ordinal',1);
 %% Print a summary of the variables
 summary(dt);
 
-% How many observations?
-% How many independent variables? Dependent?
-% How are missing values coded?
-% How many observations are missing values?
+% 3. How many observations?
+% 4. How many independent variables? Dependent?
+% 5. How are missing values coded?
+% 6. How many observations are missing values?
 
 %% Remove missing data
 data = rmmissing(dt);
@@ -55,18 +55,24 @@ ylabel('Resting Systolic BP (mmHg)');
 %% Pearson product moment correlation coefficient
 [RHO,PVAL] = corr(data.age,data.trestbps,'type','Pearson'); 
 
-% Are there any assumptions made about the data when using the Pearson
-% product moment correlation coefficient? If so, list them.
-% How do you interpret these results?
+% 7. What question are you answering with this test?
+% 8. Are there any assumptions made about the data when using the Pearson
+%    product moment correlation coefficient? If so, list them.
+% 9. How do you interpret these results?
 
 %% Spearman rank order correlation coefficient
 [RHO,PVAL] = corr(data.age,data.trestbps,'type','Spearman'); %Need to convert categorical variables back to numeric indices using grp2idx() for input to corr() 
 
-% Are there any assumptions made about the data when using the Spearman
-% rank correlation coefficient? If so, list them.
-% How do you interpret these results?
-% Avoid spurrious correlations (i.e. correlation != causation), what are
-% some mechanisms that could be driving this relationship?
+% 10. Are there any assumptions made about the data when using the Spearman
+%     rank correlation coefficient? If so, list them.
+% 11. What is the difference between Pearson and Spearman?
+% 12. What is the appropriate correlation to use for these variables?
+% 13. What about between data.age and data.num?
+% 14. How do you interpret these results?
+% 15. What is the strength of the relationship?
+% 16. What is the direction of the relationship?
+% 17. Avoid spurrious correlations (i.e. correlation != causation), what are
+%     some mechanisms that could be driving this relationship?
 
 %% Examine differences between groups
 % Visualize relationship and differences by group (gscatter, boxplot)
@@ -89,8 +95,18 @@ rslts = cell2table([nms num2cell(m)]);
 rslts.Properties.VariableNames = {'Group','Mean','STDERR'};
 rslts
 
-% Are there any assumptions made about the data when using ANOVA?
-% How do you interpret these results?
+% 18. What question are you answering with this test?
+% 19. Are there any assumptions made about the data when using ANOVA?
+% 20. What is the p-value?
+% 21. What are the group means?
+% 22. How do you interpret these results?
+
+%% Testing for normality
+normplot(data.trestbps); %If normally distributed, data will be linear.
+[h,p] = lillietest(data.trestbps)
+
+% 23. What does an h=0 mean?
+% 24. Is the data normally distributed?
 
 %% Kruskal-Wallis: non-parameteric test for difference between groups
 [p,tbl,stats] = kruskalwallis(data.trestbps,data.num);
@@ -99,5 +115,9 @@ rslts = cell2table([nms num2cell(m)]);
 rslts.Properties.VariableNames = {'Group','Mean','STDERR'};
 rslts
 
-% Are there any assumptions made about the data when using the Kruskal-Wallis test?
-% How do you interpret these results?
+% 25. Are there any assumptions made about the data when using the Kruskal-Wallis test?
+% 26. What is the difference between ANOVA and Kruskal-Wallis?
+% 27. Is ANOVA or the Kruskal-Wallis test appropriate test for this case? Why?
+% 28. What is the p-value?
+% 29. What are the group means?
+% 30. How do you interpret these results?
