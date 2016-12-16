@@ -60,60 +60,79 @@ ylabel('Resting Systolic BP (mmHg)');
 %    product moment correlation coefficient? If so, list them.
 % 9. How do you interpret these results?
 
+%% Testing for normality
+normplot(data.trestbps); %If normally distributed, data will be linear.
+[h,p] = lillietest(data.trestbps)
+
+% 10. What does an h=1 mean?
+% 11. Is the data normally distributed?
+
 %% Spearman rank order correlation coefficient
 [RHO,PVAL] = corr(data.age,data.trestbps,'type','Spearman'); %Need to convert categorical variables back to numeric indices using grp2idx() for input to corr() 
 
-% 10. Are there any assumptions made about the data when using the Spearman
+% 12. Are there any assumptions made about the data when using the Spearman
 %     rank correlation coefficient? If so, list them.
-% 11. What is the difference between Pearson and Spearman?
-% 12. What is the appropriate correlation to use for these variables?
-% 13. What about between data.age and data.num?
-% 14. How do you interpret these results?
-% 15. What is the strength of the relationship?
-% 16. What is the direction of the relationship?
-% 17. Avoid spurrious correlations (i.e. correlation != causation), what are
+% 13. What is the difference between Pearson and Spearman?
+% 14. What is the appropriate correlation to use for these variables?
+% 15. What about between data.age and data.num?
+% 16. How do you interpret these results?
+% 17. What is the strength of the relationship?
+% 18. What is the direction of the relationship?
+% 19. Avoid spurrious correlations (i.e. correlation != causation), what are
 %     some mechanisms that could be driving this relationship?
 
 %% Examine differences between groups
+% Adjust the data so that we only have 2 diagnosis groups
+% 0: without heart disease
+% 1: with heart disease
+data2 = data;
+data2.num( data2.num=='1' | data2.num=='2' | data2.num=='3' | data2.num=='4' ) = '1';
+data2.num = removecats(data2.num);
+
 % Visualize relationship and differences by group (gscatter, boxplot)
 figure;
-gscatter(data.age,data.trestbps,data.num)
+gscatter(data2.age,data2.trestbps,data2.num)
 title('Age vs Resting BP grouped by Heart Disease Severity');
 xlabel('Age (yrs)');
 ylabel('Resting Systolic BP (mmHg)');
 
 figure;
-boxplot(data.trestbps,data.num)
+boxplot(data2.trestbps,data2.num)
 xlabel('Heart Disease Severity Group');
 ylabel('Resting Systolic BP');
 title('Resting BP grouped by Heart Disease Severity')
 
 %% ANOVA: parameteric test for difference between groups
-[p,tbl,stats] = anova1(data.trestbps,data.num);
+[p,tbl,stats] = anova1(data2.trestbps,data2.num);
 [c,m,h,nms] = multcompare(stats);
 rslts = cell2table([nms num2cell(m)]);
 rslts.Properties.VariableNames = {'Group','Mean','STDERR'};
 rslts
 
-% 18. What question are you answering with this test?
-% 19. Are there any assumptions made about the data when using ANOVA?
-% 20. What is the p-value?
-% 21. What are the group means?
-% 22. How do you interpret these results?
+% 20. What question are you answering with this test?
+% 21. Are there any assumptions made about the data when using ANOVA?
+% 22. What is the p-value?
+% 23. What are the group means?
+% 24. How do you interpret these results?
 
-%% Testing for normality
-normplot(data.trestbps); %If normally distributed, data will be linear.
-[h,p] = lillietest(data.trestbps)
+%% Testing for normality within each group
+figure;
+subplot(211)
+normplot(data2.trestbps(data2.num=='0')); %If normally distributed, data will be linear.
+xlabel('Resting Systolic BP');
+title('Healthy');
 
-% 23. What does an h=0 mean?
-% 24. Is the data normally distributed?
+subplot(212)
+normplot(data2.trestbps(data2.num=='1'));
+xlabel('Resting Systolic BP');
+title('Heart Disease');
+
+[h0,p0] = lillietest(data.trestbps(data2.num=='0'))
+[h1,p1] = lillietest(data.trestbps(data2.num=='1'))
 
 %% Kruskal-Wallis: non-parameteric test for difference between groups
-[p,tbl,stats] = kruskalwallis(data.trestbps,data.num);
-[c,m,h,nms] = multcompare(stats);
-rslts = cell2table([nms num2cell(m)]);
-rslts.Properties.VariableNames = {'Group','Mean','STDERR'};
-rslts
+[p,tbl,stats] = kruskalwallis(data2.trestbps,data2.num);
+c = multcompare(stats);
 
 % 25. Are there any assumptions made about the data when using the Kruskal-Wallis test?
 % 26. What is the difference between ANOVA and Kruskal-Wallis?
@@ -121,3 +140,26 @@ rslts
 % 28. What is the p-value?
 % 29. What are the group means?
 % 30. How do you interpret these results?
+
+%% Questions
+% 2. Differences in age between groups with and with diagnosis
+% Test for normality
+figure;
+subplot(211)
+normplot(data2.age(data2.num=='0')); 
+xlabel('age');
+title('Healthy');
+subplot(212)
+normplot(data2.age(data2.num=='1'));
+xlabel('Age');
+title('Heart Disease');
+
+[h0,p0] = lillietest(data2.age(data2.num=='0'))
+[h1,p1] = lillietest(data2.age(data2.num=='1'))
+
+%Data is not normally distributed within groups.
+[p,tbl,stats] = kruskalwallis(data2.age,data2.num);
+c = multcompare(stats);
+
+%The non-disease group is significantly younger.
+
